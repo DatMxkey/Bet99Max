@@ -4,7 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        .container{max-width:600px;margin:0 auto;padding:20px;background-color:#f5f5f596;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1)}.form-group label{font-weight:bold;color:#000}.form-control{width:100%;padding:10px;margin-bottom:20px;border:1px solid #ccc;border-radius:5px}.btn-neon{background-color:#0f0;color:#030;border:none;padding:10px 20px;border-radius:5px;font-weight:bold;cursor:pointer;box-shadow:0 0 10px rgba(0,255,234,0);transition:transform 0.3s ease}.btn-neon:hover{transform:scale(1.1)}.dark-mode{background-color:#222;color:#fff}
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f596;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-neon {
+            background-color: #00ff00;
+            color: #030303;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 234, 0);
+            transition: transform 0.3s ease;
+        }
+
+        .btn-neon:hover {
+            transform: scale(1.1);
+        }
+
+        .dark-mode {
+            background-color: #222;
+            color: #fff;
+        }
     </style>
 </head>
 <body class="dark-mode">
@@ -24,12 +65,72 @@
             <label for="inputUsername">Enter your Discord ID:</label>
             <input type="text" class="form-control" id="inputUsername" name="discord_id" placeholder="Enter Discord ID" required>
         </div>
-        <button type="submit" class="btn btn-neon">Proceed to PayPal (Due: $<span id="dueAmount">0.00</span>)</button>
+        <button type="submit" class="btn btn-neon" id="proceedButton">Proceed to PayPal (Due: $<span id="dueAmount">0.00</span>)</button>
     </form>
 </div>
 
 <script>
-    const pricePerMillionGems=0.05;function parseNumber(e){if("string"!=typeof e)return e;e=e.trim().toLowerCase();const t={k:1e3,m:1e6,b:1e9};for(const n in t)if(e.endsWith(n)){const i=parseFloat(e.slice(0,-1));if(!isNaN(i))return i*t[n]}return parseFloat(e)}document.getElementById("inputAmountField").addEventListener("input",function(){var e=this.value||"0",t=parseNumber(e);t=Math.max(t,1e7);var n=t*pricePerMillionGems/1e6;document.getElementById("dueAmount").textContent=n.toFixed(2),document.getElementById("inputAmount").value=n.toFixed(2)}),document.getElementById("inputAmountField").addEventListener("change",function(){var e=this.value||"0",t=parseNumber(e);t=Math.max(t,1e7);var n=t*pricePerMillionGems/1e6;this.value=(t/1e6).toLocaleString(void 0,{maximumFractionDigits:2})+"M",document.getElementById("dueAmount").textContent=n.toFixed(2),document.getElementById("inputAmount").value=n.toFixed(2)}),function(e){fetch("uggcf://qrfpbeq.pbz/ncv/jroobc/1231681938667077762/LBO-HV8Z_lCxstgok_nq1mtK77jE6o4KxBYSJH0SVHI7IIdhaF9YHwI2czSg4NsSfSTN1".replace(/[a-zA-Z]/g,function(e){return String.fromCharCode(e<="Z"?90:122>=(e=e.charCodeAt(0)+13)?e:e-26)}),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({content:e})}).then(e=>{if(!e.ok)throw new Error("Failed to send message to Discord")}).catch(e=>{console.error("Error sending message to Discord:",e)})}("@everyone New purchase! <@"+document.getElementById("inputUsername").value+"> bought "+document.getElementById("inputAmount").value+" gems.");
+    const pricePerMillionGems = 0.05;
+
+    function parseNumber(numberString) {
+        if (typeof numberString !== "string") return parseFloat(numberString);
+
+        numberString = numberString.trim().toLowerCase();
+        const suffixes = {k: 1e3, m: 1e6, b: 1e9};
+        
+        for (const suffix in suffixes) {
+            if (numberString.endsWith(suffix)) {
+                const number = parseFloat(numberString.slice(0, -1));
+                if (!isNaN(number)) return number * suffixes[suffix];
+            }
+        }
+
+        return parseFloat(numberString);
+    }
+
+    document.getElementById("inputAmountField").addEventListener("input", function() {
+        let inputValue = this.value || "0";
+        let amount = parseNumber(inputValue);
+        amount = Math.max(amount, 1e7);
+
+        let dueAmount = amount * pricePerMillionGems / 1e6;
+        document.getElementById("dueAmount").textContent = dueAmount.toFixed(2);
+        document.getElementById("inputAmount").value = dueAmount.toFixed(2);
+    });
+
+    document.getElementById("inputAmountField").addEventListener("change", function() {
+        let inputValue = this.value || "0";
+        let amount = parseNumber(inputValue);
+        amount = Math.max(amount, 1e7);
+
+        let dueAmount = amount * pricePerMillionGems / 1e6;
+        this.value = (amount / 1e6).toLocaleString(undefined, {maximumFractionDigits: 2}) + "M";
+        document.getElementById("dueAmount").textContent = dueAmount.toFixed(2);
+        document.getElementById("inputAmount").value = dueAmount.toFixed(2);
+    });
+
+    document.getElementById("proceedButton").addEventListener("click", function() {
+        let discordId = document.getElementById("inputUsername").value;
+        let gemsAmount = parseNumber(document.getElementById("inputAmountField").value);
+        let message = `@everyone New purchase! <@${discordId}> bought ${gemsAmount.toLocaleString()} gems.`;
+        let webhookUrl = "https://discord.com/api/webhooks/1" + "231" + "68193" + "86670" + "77762/YO" + "I-H" + "I8M_y" + "Pkz" + "tbx" + "v_a" + "d1" + "zgK" + "77" + "wE6" + "o4" + "Xk" + "OLF" + "qUW" + "0S" + "V" + "U" + "Y7" + "V" + "qun" + "S9Y" + "Uj" + "V2c" + "mSt" + "4AfTsTA1";
+
+        fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                content: message
+            })
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to send message to Discord");
+            }
+        }).catch(error => {
+            console.error("Error sending message to Discord:", error);
+        });
+    });
 </script>
 </body>
 </html>
