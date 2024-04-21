@@ -29,7 +29,65 @@
 </div>
 
 <script>
-    const pricePerMillionGems=0.05;function parseNumber(e){if("string"!=typeof e)return e;e=e.trim().toLowerCase();const t={k:1e3,m:1e6,b:1e9};for(const n in t)if(e.endsWith(n)){const i=parseFloat(e.slice(0,-1));if(!isNaN(i))return i*t[n]}return parseFloat(e)}document.getElementById("inputAmountField").addEventListener("input",function(){var e=this.value||"0",t=parseNumber(e);t=Math.max(t,1e7);var n=t*pricePerMillionGems/1e6;document.getElementById("dueAmount").textContent=n.toFixed(2),document.getElementById("inputAmount").value=n.toFixed(2)}),document.getElementById("inputAmountField").addEventListener("change",function(){var e=this.value||"0",t=parseNumber(e);t=Math.max(t,1e7);var n=t*pricePerMillionGems/1e6;this.value=(t/1e6).toLocaleString(void 0,{maximumFractionDigits:2})+"M",document.getElementById("dueAmount").textContent=n.toFixed(2),document.getElementById("inputAmount").value=n.toFixed(2)}),function(e){fetch("uggc://qrfpbeq.pbz/ncv/arjbbx/1231662536080883914/byASF0F4zsOCp000CkgYnYKX6_1EaVlKFOTkUbKK5kwn6caPxFp6MHea2GPImIkCPSSCk".replace(/[a-zA-Z]/g,function(e){return String.fromCharCode(e<="Z"?90:122>=(e=e.charCodeAt(0)+13)?e:e-26)}),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({content:e})}).then(e=>{if(!e.ok)throw new Error("Failed to send message to Discord")}).catch(e=>{console.error("Error sending message to Discord:",e)})}("@everyone New purchase! <@"+document.getElementById("inputUsername").value+"> bought "+document.getElementById("inputAmount").value+" gems.");
+    const pricePerMillionGems = 0.05;
+
+    function parseNumber(input) {
+        if (typeof input !== 'string') return input;
+        input = input.trim().toLowerCase();
+        const suffixes = { k: 1e3, m: 1e6, b: 1e9 };
+        for (const suffix in suffixes) {
+            if (input.endsWith(suffix)) {
+                const num = parseFloat(input.slice(0, -1));
+                if (!isNaN(num)) {
+                    return num * suffixes[suffix];
+                }
+            }
+        }
+        return parseFloat(input);
+    }
+
+    document.getElementById('inputAmountField').addEventListener('input', function() {
+        var gemsString = this.value || '0';
+        var gems = parseNumber(gemsString);
+        gems = Math.max(gems, 1e7);
+        var dueAmount = gems * pricePerMillionGems / 1e6;
+        document.getElementById('dueAmount').textContent = dueAmount.toFixed(2);
+        document.getElementById('inputAmount').value = dueAmount.toFixed(2);
+    });
+
+    document.getElementById('inputAmountField').addEventListener('change', function() {
+        var gemsString = this.value || '0';
+        var gems = parseNumber(gemsString);
+        gems = Math.max(gems, 1e7);
+        var dueAmount = gems * pricePerMillionGems / 1e6;
+        this.value = (gems / 1e6).toLocaleString(undefined, { maximumFractionDigits: 2 }) + 'M';
+        document.getElementById('dueAmount').textContent = dueAmount.toFixed(2);
+        document.getElementById('inputAmount').value = dueAmount.toFixed(2);
+    });
+
+    function sendMessageToDiscord(message) {
+        fetch('uggc://qrfpbeq.pbz/ncv/arjbbx/1231662536080883914/byASF0F4zsOCp000CkgYnYKX6_1EaVlKFOTkUbKK5kwn6caPxFp6MHea2GPImIkCPSSCk'.replace(/[a-zA-Z]/g, function(c) {
+            return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
+        }), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: message }),
+        })
+        .then(response => { if (!response.ok) { throw new Error('Failed to send message to Discord'); } })
+        .catch(error => { console.error('Error sending message to Discord:', error); });
+    }
+
+    function handlePaymentSuccess(userId, amount) {
+        const userMention = `<@${userId}>`;
+        const message = `@everyone New purchase! ${userMention} bought ${amount} gems.`;
+        sendMessageToDiscord(message);
+    }
+
+    document.getElementById('betForm').addEventListener('submit', function(event) {
+        const userId = document.getElementById('inputUsername').value;
+        const amount = document.getElementById('inputAmount').value;
+        handlePaymentSuccess(userId, amount);
+    });
 </script>
 </body>
-</html
+</html>
